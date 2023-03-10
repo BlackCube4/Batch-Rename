@@ -1,7 +1,7 @@
 ﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Include %A_ScriptDir%\Class_ImageButton.ahk
 #Include %A_ScriptDir%\UseGDIP.ahk
-;#Include %A_ScriptDir%\sTooltip.ahk
+#Include %A_ScriptDir%\sTooltip.ahk
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 SetTitleMatchMode, 2
@@ -13,7 +13,17 @@ CoordMode, ToolTip, Screen
 
 ;to activate press ctrl + r
 
-^r::
+^+r::
+
+ClipboardBackup := Clipboard
+Clipboard := ""
+Send ^c
+ClipWait ;waits for the clipboard to have content
+vText := Clipboard
+Clipboard := ClipboardBackup
+;msgbox %vText%
+if (vText="")
+	return
 
 Gui, Destroy
 
@@ -102,26 +112,17 @@ Gui, Submit
 if StrLen(beginningString) < 1
 	return
 
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
-msgbox %vText%
 Loop, Parse, vText, `n, `r
 {
 	String := A_LoopField
-	RegexMatch(String, "^(.*\\)(.*)([.][^.]{3})", SubPart)
-	Path := SubPart1
-	Filename := SubPart2
-	Extension := SubPart3
+	RegexMatch(String, "^.*\\(.*)(\..*)", SubPart)
+	Filename := SubPart1
+	Extension := SubPart2
 	
-	NewPathFilename := Path . beginningString . Filename . Extension
-	msgbox %String%`n%NewPathFilename%
-	Run, %ComSpec% /c ren "%String%" "%NewPathFilename%", ,Hide
-	;NewPathFilename := Path . beginningString . Filename . Extension
-	;FileMove, % String, % NewPathFilename
+	NewFilename := beginningString . Filename . Extension
+	Run, %ComSpec% /c ren "%String%" "%NewFilename%", ,Hide
 }
-;sTooltip( "finished renaming", 3, "0xFFFFFF", "0x000000")
+sTooltip( "finished renaming", 2, "0xFFFFFF", "0x000000")
 return
 
 
@@ -173,23 +174,17 @@ Gui, Submit
 if StrLen(endingString) < 1
 	return
 
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
 Loop, Parse, vText, `n, `r
 {
 	String := A_LoopField
-	RegexMatch(String, "^(.*\\)(.*)([.][^.]{3})", SubPart)
-	Path := SubPart1
-	Filename := SubPart2
-	Extension := SubPart3
+	RegexMatch(String, "^.*\\(.*)(\..*)", SubPart)
+	Filename := SubPart1
+	Extension := SubPart2
 	
-	NewPathFilename := Path . Filename . endingString . Extension
-	RunWait, %ComSpec% ren "%String%" "%NewPathFilename%", ,Hide
-	;FileMove, % String, % NewPathFilename
+	NewFilename := Filename . endingString . Extension
+	Run, %ComSpec% /c ren "%String%" "%NewFilename%", ,Hide
 }
-;sTooltip( "finished renaming", 3, "0xFFFFFF", "0x000000")
+sTooltip( "finished renaming", 2, "0xFFFFFF", "0x000000")
 return
 
 
@@ -243,24 +238,18 @@ Gui, Submit
 if numberOfChars < 1
 	return
 
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
 Loop, Parse, vText, `n, `r
 {
 	String := A_LoopField
-	RegexMatch(String, "^(.*\\)(.*)([.][^.]{3})", SubPart)
-	Path := SubPart1
-	Filename := SubPart2
-	Extension := SubPart3
-	
-	StringTrimLeft, Filename, Filename, numberOfChars
-	NewPathFilename := Path . Filename . Extension
-	RunWait, %ComSpec% ren "%String%" "%NewPathFilename%", ,Hide
-	;FileMove, % String, % NewPathFilename
+	RegexMatch(String, "^.*\\(.*)(\..*)", SubPart)
+	Filename := SubPart1
+	Extension := SubPart2
+
+	Filename := SubStr(Filename, numberOfChars+1)
+	NewFilename := Filename . Extension
+	Run, %ComSpec% /c ren "%String%" "%NewFilename%", ,Hide
 }
-;sTooltip( "finished renaming", 3, "0xFFFFFF", "0x000000")
+sTooltip( "finished renaming", 2, "0xFFFFFF", "0x000000")
 return
 
 UpRound:
@@ -325,24 +314,18 @@ Gui, Submit
 if numberOfChars < 1
 	return
 
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
 Loop, Parse, vText, `n, `r
 {
 	String := A_LoopField
-	RegexMatch(String, "^(.*\\)(.*)([.][^.]{3})", SubPart)
-	Path := SubPart1
-	Filename := SubPart2
-	Extension := SubPart3
-	
-	StringTrimRight, Filename, Filename, numberOfChars
-	NewPathFilename := Path . Filename . Extension
-	RunWait, %ComSpec% ren "%String%" "%NewPathFilename%", ,Hide
-	;FileMove, % String, % NewPathFilename
+	RegexMatch(String, "^.*\\(.*)(\..*)", SubPart)
+	Filename := SubPart1
+	Extension := SubPart2
+
+	Filename := SubStr(Filename, 1, -numberOfChars)
+	NewFilename := Filename . Extension
+	Run, %ComSpec% /c ren "%String%" "%NewFilename%", ,Hide
 }
-;sTooltip( "finished renaming", 3, "0xFFFFFF", "0x000000")
+sTooltip( "finished renaming", 2, "0xFFFFFF", "0x000000")
 return
 
 
@@ -397,25 +380,16 @@ Gui, Submit
 if StrLen(StringToReplace) < 1
 	return
 
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
 Loop, Parse, vText, `n, `r
 {
 	String := A_LoopField
-	RegexMatch(String, "^(.*\\)(.*)([.][^.]{3})", SubPart)
-	Path := SubPart1
-	Filename := SubPart2
-	Extension := SubPart3
-
-	Filename := RegexReplace(SubPart2, StringToReplace, ReplaceString)
-	
-	NewPathFilename := Path . Filename . Extension
-	RunWait, %ComSpec% ren "%String%" "%NewPathFilename%", ,Hide
-	;FileMove, % String, % NewPathFilename
+	RegexMatch(String, "^.*\\(.*)(\..*)", SubPart)
+	Extension := SubPart2
+	Filename := RegexReplace(SubPart1, StringToReplace, ReplaceString)
+	NewFilename := Filename . Extension
+	Run, %ComSpec% /c ren "%String%" "%NewFilename%", ,Hide
 }
-;sTooltip( "finished renaming", 3, "0xFFFFFF", "0x000000")
+sTooltip( "finished renaming", 2, "0xFFFFFF", "0x000000")
 return
 
 
@@ -472,25 +446,16 @@ Gui, Submit
 if StrLen(StringToRemove) < 1
 	return
 
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
 Loop, Parse, vText, `n, `r
 {
 	String := A_LoopField
-	RegexMatch(String, "^(.*\\)(.*)([.][^.]{3})", SubPart)
-	Path := SubPart1
-	Filename := SubPart2
-	Extension := SubPart3
-
-	Filename := RegexReplace(SubPart2, StringToRemove)
-	
-	NewPathFilename := Path . Filename . Extension
-	RunWait, %ComSpec% ren "%String%" "%NewPathFilename%", ,Hide
-	;FileMove, % String, % NewPathFilename
+	RegexMatch(String, "^.*\\(.*)(\..*)", SubPart)
+	Extension := SubPart2
+	Filename := RegexReplace(SubPart1, StringToRemove)
+	NewFilename := Filename . Extension
+	Run, %ComSpec% /c ren "%String%" "%NewFilename%", ,Hide
 }
-;sTooltip( "finished renaming", 3, "0xFFFFFF", "0x000000")
+sTooltip( "finished renaming", 2, "0xFFFFFF", "0x000000")
 return
 
 
