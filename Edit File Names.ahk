@@ -2,6 +2,7 @@
 #Include %A_ScriptDir%\Class_ImageButton.ahk
 #Include %A_ScriptDir%\UseGDIP.ahk
 #Include %A_ScriptDir%\sTooltip.ahk
+#Include %A_ScriptDir%\GetPathOfSelectedFiles.ahk
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 SetTitleMatchMode, 2
@@ -11,17 +12,12 @@ CoordMode, ToolTip, Screen
 
 #IfWinActive ahk_class CabinetWClass
 
-;to activate press ctrl + r
+;to activate press ctrl + shift + r
 
 ^+r::
 
-ClipboardBackup := Clipboard
-Clipboard := ""
-Send ^c
-ClipWait ;waits for the clipboard to have content
-vText := Clipboard
-Clipboard := ClipboardBackup
-;msgbox %vText%
+vText := Explorer_GetSelected()
+msgbox %vText%
 if (vText="")
 	return
 
