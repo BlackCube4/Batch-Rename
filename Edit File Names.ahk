@@ -17,7 +17,7 @@ CoordMode, ToolTip, Screen
 ^+r::
 
 vText := Explorer_GetSelected()
-msgbox %vText%
+;msgbox %vText%
 if (vText="")
 	return
 
